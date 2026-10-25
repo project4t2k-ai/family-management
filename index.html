@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ระบบจัดการครอบครัว</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f4f6fb;
+      color: #243047;
+    }
+    header {
+      background: #243b67;
+      color: white;
+      padding: 26px 18px;
+    }
+    header h1 { margin: 0 0 8px; font-size: 25px; }
+    header p { margin: 0; color: #e0e8ff; }
+    main { max-width: 850px; margin: auto; padding: 18px; }
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    button, .panel {
+      border: 0;
+      border-radius: 14px;
+      padding: 18px;
+      background: white;
+      box-shadow: 0 2px 8px #1d315010;
+    }
+    button {
+      color: #243b67;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+    }
+    button:focus, input:focus, textarea:focus {
+      outline: 2px solid #6b8de3;
+    }
+    button span { display: block; font-size: 25px; margin-bottom: 8px; }
+    .panel { margin-top: 16px; }
+    h2 { font-size: 19px; margin-top: 0; }
+    label { display: block; margin: 12px 0 5px; }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd3e2;
+      border-radius: 9px;
+      font: inherit;
+      background: white;
+    }
+    .primary {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      text-align: center;
+      background: #243b67;
+      color: white;
+    }
+    .note { color: #5d6980; font-size: 13px; }
+    #message { color: #17633c; }
+    footer { text-align: center; padding: 24px; color: #69758b; }
+    @media (max-width: 380px) {
+      main { padding: 12px; }
+      .menu { gap: 8px; }
+      button, .panel { padding: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏡 ระบบจัดการครอบครัว</h1>
+    <p>จัดการสมาชิกและนัดหมายในที่เดียว</p>
+  </header>
+
+  <main>
+    <div class="menu">
+      <button onclick="showSection('family')">
+        <span>🏠</span>ข้อมูลครอบครัว
+      </button>
+      <button onclick="showSection('members')">
+        <span>👨‍👩‍👧‍👦</span>สมาชิกในบ้าน
+      </button>
+      <button onclick="showSection('appointments')">
+        <span>📅</span>เพิ่มนัดหมาย
+      </button>
+      <button onclick="showSection('list')">
+        <span>📋</span>รายการนัดหมาย
+      </button>
+    </div>
+
+    <section class="panel" id="content">
+      <h2>ยินดีต้อนรับ</h2>
+      <p>เลือกเมนูด้านบนเพื่อเริ่มใช้งาน</p>
+      <p class="note">นี่คือเว็บไซต์ต้นแบบ ยังไม่มีฐานข้อมูลจริง</p>
+    </section>
+    <p id="message" role="status"></p>
+  </main>
+
+  <footer>ระบบจัดการครอบครัว · รุ่นทดลอง</footer>
+
+  <script>
+    const content = document.getElementById('content');
+    const message = document.getElementById('message');
+    const appointments = [];
+
+    function showSection(section) {
+      message.textContent = '';
+
+      if (section === 'family') {
+        content.innerHTML = `
+          <h2>🏠 ข้อมูลครอบครัว</h2>
+          <label>ชื่อครอบครัว</label>
+          <input id="familyName" placeholder="เช่น ครอบครัวใจดี">
+          <button class="primary" onclick="demoSave('ข้อมูลครอบครัว')">
+            ทดลองบันทึก
+          </button>
+          <p class="note">รุ่นทดลองยังไม่บันทึกข้อมูลลงฐานข้อมูล</p>`;
+      } else if (section === 'members') {
+        content.innerHTML = `
+          <h2>👨‍👩‍👧‍👦 สมาชิกในบ้าน</h2>
+          <label>ชื่อสมาชิก (ข้อมูลตัวอย่าง)</label>
+          <input id="memberName" placeholder="กรอกชื่อสมมติ">
+          <button class="primary" onclick="demoSave('สมาชิก')">
+            ทดลองเพิ่มสมาชิก
+          </button>
+          <p class="note">ยังไม่มีระบบสมาชิกจริงหรือการยืนยันตัวตน</p>`;
+      } else if (section === 'appointments') {
+        content.innerHTML = `
+          <h2>📅 เพิ่มนัดหมาย</h2>
+          <form id="appointmentForm">
+            <label>เรื่องที่นัด</label>
+            <input name="purpose" required placeholder="เช่น นัดพบแพทย์">
+            <label>ผู้เข้าร่วม</label>
+            <input name="attendee" required placeholder="ชื่อสมาชิก">
+            <label>วันที่</label>
+            <input name="date" type="date" required>
+            <label>เวลาเริ่ม</label>
+            <input name="start" type="time" required>
+            <label>เวลาสิ้นสุด</label>
+            <input name="end" type="time">
+            <label>สถานที่</label>
+            <input name="place" placeholder="สถานที่นัด">
+            <label>รายละเอียดเพิ่มเติม</label>
+            <textarea name="details" rows="3"></textarea>
+            <button class="primary" type="submit">เพิ่มรายการทดลอง</button>
+          </form>
+          <p class="note">ข้อมูลจะอยู่ในหน้านี้ชั่วคราวเท่านั้น</p>`;
+
+        document.getElementById('appointmentForm')
+          .addEventListener('submit', function(event) {
+            event.preventDefault();
+            const data = Object.fromEntries(new FormData(this));
+            appointments.push(data);
+            message.textContent = 'เพิ่มรายการทดลองแล้ว';
+            showSection('list');
+          });
+      } else if (section === 'list') {
+        content.innerHTML = '<h2>📋 รายการนัดหมาย</h2>';
+        if (!appointments.length) {
+          content.innerHTML += '<p>ยังไม่มีรายการนัดหมายในรอบทดลองนี้</p>';
+        } else {
+          appointments.forEach((a, i) => {
+            content.innerHTML += `
+              <div class="panel">
+                <strong>${escapeText(a.purpose)}</strong>
+                <p>ผู้เข้าร่วม: ${escapeText(a.attendee)}</p>
+                <p>วันที่: ${escapeText(a.date)} เวลา ${escapeText(a.start)}</p>
+                <p>สถานที่: ${escapeText(a.place || '-')}</p>
+                <button onclick="cancelDemo(${i})">ลบรายการทดลอง</button>
+              </div>`;
+          });
+        }
+      }
+    }
+
+    function escapeText(value) {
+      const el = document.createElement('span');
+      el.textContent = String(value || '');
+      return el.innerHTML;
+    }
+
+    function cancelDemo(index) {
+      appointments.splice(index, 1);
+      showSection('list');
+    }
+
+    function demoSave(item) {
+      message.textContent =
+        'ทดสอบปุ่ม ' + item + ' แล้ว แต่ยังไม่ได้บันทึกข้อมูลจริง';
+    }
+  </script>
+</body>
+</html>
